@@ -14,7 +14,7 @@ public class AnswerService {
 
     private static final double PASS_MARK = 68.00;
 
-    private final Map<String, String> answers = new HashMap<>();
+    private final Map<Integer, String> answers = new TreeMap<>();
     private final AnswersConfig answersConfig;
 
     public AnswerService(AnswersConfig answersConfig) {
@@ -22,23 +22,23 @@ public class AnswerService {
     }
 
     public void saveAnswer(int questionId, String answer) {
-        answers.put(String.valueOf(questionId), answer.toUpperCase());
+        answers.put(questionId, answer.toUpperCase());
     }
 
     public void computeResult(Model model) {
         AtomicInteger score = new AtomicInteger(0);
         int total = answersConfig.getAnswers().size();
-        Map<String, String[]> reviews = new HashMap<>();
+        Map<Integer, String[]> reviews = new TreeMap<>();
 
         answersConfig.getAnswers().forEach((question, ans) -> {
             Set<String> userAns = Arrays
-                    .stream(answers.getOrDefault(question, Strings.EMPTY).split("\\s*,\\s*"))
+                    .stream(answers.getOrDefault(Integer.parseInt(question), Strings.EMPTY).split("\\s*,\\s*"))
                     .collect(Collectors.toSet());
 
             if (ans.equals(userAns)) {
                 score.getAndIncrement();
             } else {
-                reviews.put(question, new String[] {
+                reviews.put(Integer.parseInt(question), new String[] {
                         Strings.join(userAns, ','),
                         Strings.join(ans, ',')
                 });
@@ -53,7 +53,7 @@ public class AnswerService {
         model.addAttribute("reviews", reviews);
     }
 
-    public Map<String, String> getAnswers() {
+    public Map<Integer, String> getAnswers() {
         return answers;
     }
 
